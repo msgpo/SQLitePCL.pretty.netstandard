@@ -5,6 +5,13 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <Authors>David Bordoley, Jellyfin Contributors</Authors>
+    <PackageId>SQLitePCL.pretty.netstandard</PackageId>
+    <PackageLicenseUrl>https://www.apache.org/licenses/LICENSE-2.0.txt</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/jellyfin/SQLitePCL.pretty.netstandard</RepositoryUrl>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="SQLitePCLRaw.core" Version="1.1.13" />
   </ItemGroup>
