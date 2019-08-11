@@ -26,7 +26,7 @@ namespace SQLitePCL.pretty
     /// Extensions methods for <see cref="IStatement"/> result set rows.
     /// </summary>
     public static class ResultSet
-    {   
+    {
         /// <summary>
         /// Selects the value in the first column of the result set row.
         /// </summary>
@@ -58,14 +58,6 @@ namespace SQLitePCL.pretty
         /// <param name="This">An enumerable of result set rows.</param>
         public static IEnumerable<string> SelectScalarString(this IEnumerable<IReadOnlyList<IResultSetValue>> This) =>
             This.SelectScalar().Select(x => x.ToString());
-
-        /// <summary>
-        /// Selects the value in the first column of the result set row as a <see cref="byte"/> array.
-        /// </summary>
-        /// <returns>An IEnumerable of the scalar values.</returns>
-        /// <param name="This">An enumerable of result set rows.</param>
-        public static IEnumerable<byte[]> SelectScalarBlob(this IEnumerable<IReadOnlyList<IResultSetValue>> This) =>
-            This.SelectScalar().Select(x => x.ToBlob());
 
         /// <summary>
         /// Selects the value in the first column of the result set row as a <see cref="double"/>.

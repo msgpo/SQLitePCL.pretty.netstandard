@@ -16,7 +16,6 @@
 */
 
 using System;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -382,8 +381,8 @@ namespace SQLitePCL.pretty
         public int Length =>
             raw.sqlite3_value_bytes(value);
 
-        public byte[] ToBlob() =>
-            raw.sqlite3_value_blob(value) ?? new byte[0];
+        public ReadOnlySpan<byte> ToBlob() =>
+            raw.sqlite3_value_blob(value);
 
         public double ToDouble() =>
             raw.sqlite3_value_double(value);
@@ -395,7 +394,7 @@ namespace SQLitePCL.pretty
             raw.sqlite3_value_int64(value);
 
         public override string ToString() =>
-            raw.sqlite3_value_text(value) ?? "";
+            raw.sqlite3_value_text(value).utf8_to_string() ?? string.Empty;
     }
 
     // Type coercion rules
@@ -406,7 +405,7 @@ namespace SQLitePCL.pretty
 
         public int Length => 0;
 
-        public byte[] ToBlob() => new byte[0];
+        public ReadOnlySpan<byte> ToBlob() => Span<byte>.Empty;
 
         public double ToDouble() => 0.0;
 
@@ -414,7 +413,7 @@ namespace SQLitePCL.pretty
 
         public long ToInt64() => 0;
 
-        public override string ToString() => "";
+        public override string ToString() => string.Empty;
     }
 
     internal struct IntValue : ISQLiteValue
@@ -431,7 +430,7 @@ namespace SQLitePCL.pretty
         public int Length =>
             this.ToBlob().Length;
 
-        public byte[] ToBlob() =>
+        public ReadOnlySpan<byte> ToBlob() =>
             this.ToString().ToSQLiteValue().ToBlob();
 
         public double ToDouble() => value;
@@ -465,7 +464,7 @@ namespace SQLitePCL.pretty
         // Casting to a BLOB consists of first casting the value to TEXT
         // in the encoding of the database connection, then interpreting
         // the resulting byte sequence as a BLOB instead of as TEXT.
-        public byte[] ToBlob()
+        public ReadOnlySpan<byte> ToBlob()
         {
             throw new NotSupportedException();
         }
@@ -490,10 +489,7 @@ namespace SQLitePCL.pretty
             }
         }
 
-        public override string ToString()
-        {
-            throw new NotSupportedException();
-        }
+        public override string ToString() => throw new NotSupportedException();
     }
 
     internal class StringValue : ISQLiteValue
@@ -513,7 +509,7 @@ namespace SQLitePCL.pretty
 
         public int Length => this.ToBlob().Length;
 
-        public byte[] ToBlob() => Encoding.UTF8.GetBytes(value);
+        public ReadOnlySpan<byte> ToBlob() => Encoding.UTF8.GetBytes(value);
 
         // When casting a TEXT value to REAL, the longest possible prefix
         // of the value that can be interpreted as a real number is extracted
@@ -527,7 +523,7 @@ namespace SQLitePCL.pretty
             if (result.Success)
             {
                 double parsed;
-                if (Double.TryParse(result.Value, out parsed))
+                if (double.TryParse(result.Value, out parsed))
                 {
                     return parsed;
                 }
@@ -585,7 +581,7 @@ namespace SQLitePCL.pretty
 
         public int Length => value.Length;
 
-        public byte[] ToBlob() => value;
+        public ReadOnlySpan<byte> ToBlob() => value;
 
         // When casting a BLOB value to a REAL, the value is first converted to TEXT.
         public double ToDouble() =>
@@ -621,8 +617,8 @@ namespace SQLitePCL.pretty
         public int Length =>
             raw.sqlite3_column_bytes(stmt.sqlite3_stmt, index);
 
-        public byte[] ToBlob() =>
-            raw.sqlite3_column_blob(stmt.sqlite3_stmt, index) ?? new byte[0];
+        public ReadOnlySpan<byte> ToBlob() =>
+            raw.sqlite3_column_blob(stmt.sqlite3_stmt, index);
 
         public double ToDouble() =>
             raw.sqlite3_column_double(stmt.sqlite3_stmt, index);
@@ -634,7 +630,7 @@ namespace SQLitePCL.pretty
             raw.sqlite3_column_int64(stmt.sqlite3_stmt, index);
 
         public override string ToString() =>
-            raw.sqlite3_column_text(stmt.sqlite3_stmt, index) ?? "";
+            raw.sqlite3_column_text(stmt.sqlite3_stmt, index).utf8_to_string();
     }
 
     internal class ZeroBlob : ISQLiteValue
@@ -650,7 +646,7 @@ namespace SQLitePCL.pretty
 
         public int Length => length;
 
-        public byte[] ToBlob() => new byte[length];
+        public ReadOnlySpan<byte> ToBlob() => new ReadOnlySpan<byte>(new byte[length]);
 
         public double ToDouble() => 0;
 
@@ -658,6 +654,6 @@ namespace SQLitePCL.pretty
 
         public long ToInt64() => 0;
 
-        public override string ToString() =>  "";
+        public override string ToString() => string.Empty;
     }
 }
