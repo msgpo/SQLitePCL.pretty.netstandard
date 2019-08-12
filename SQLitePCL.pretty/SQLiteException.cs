@@ -84,6 +84,6 @@ namespace SQLitePCL.pretty
 
         /// <inheritdoc/>
         public override string ToString() =>
-            $"{ErrorCode}: {Message}\r\n{base.ToString()}";
+            $"{ErrorCode}: {base.ToString()}";
     }
 }
