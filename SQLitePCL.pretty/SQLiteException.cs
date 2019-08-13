@@ -76,17 +76,14 @@ namespace SQLitePCL.pretty
         /// </summary>
         public ErrorCode ExtendedErrorCode { get; }
 
-        private readonly string errmsg;
-
-        private SQLiteException(ErrorCode errorCode, ErrorCode extendedErrorCode, string msg)
+        private SQLiteException(ErrorCode errorCode, ErrorCode extendedErrorCode, string msg) : base(msg)
         {
             this.ErrorCode = errorCode;
             this.ExtendedErrorCode = extendedErrorCode;
-            errmsg = msg;
         }
 
         /// <inheritdoc/>
         public override string ToString() =>
-            $"{ErrorCode}: {errmsg}\r\n{base.ToString()}";
+            $"{ErrorCode}: {base.ToString()}";
     }
 }
