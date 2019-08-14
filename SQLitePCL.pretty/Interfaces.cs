@@ -209,11 +209,11 @@ namespace SQLitePCL.pretty
         string Name { get; }
 
         /// <summary>
-        /// Binds the parameter to a byte array.
+        /// Binds the parameter to a byte span.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/bind_blob.html"/>
-        /// <param name="blob">The byte array to bind.</param>
-        void Bind(byte[] blob);
+        /// <param name="blob">The byte span to bind.</param>
+        void Bind(ReadOnlySpan<byte> blob);
 
         /// <summary>
         /// Binds the parameter to a double.
@@ -279,7 +279,7 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Returns the SQLiteValue as a byte array. Casting if necessary.
         /// </summary>
-        byte[] ToBlob();
+        ReadOnlySpan<byte> ToBlob();
 
         /// <summary>
         /// Returns the SQLiteValue as a double. Casting if necessary.

@@ -38,7 +38,7 @@ namespace SQLitePCL.pretty
         /// <param name="x">A ColumnInfo instance.</param>
         /// <param name="y">A ColumnInfo instance.</param>
         /// <returns><see langword="true"/> if the two instances are not equal to each other; otherwise,  <see langword="false"/>.</returns>
-        public static bool operator !=(ColumnInfo x, ColumnInfo y) => 
+        public static bool operator !=(ColumnInfo x, ColumnInfo y) =>
             !(x == y);
 
         /// <summary>
@@ -91,17 +91,23 @@ namespace SQLitePCL.pretty
 
         internal static ColumnInfo Create(StatementImpl stmt, int index) =>
             new ColumnInfo(
-                raw.sqlite3_column_name(stmt.sqlite3_stmt, index),
-                TryOrDefault (() => raw.sqlite3_column_database_name(stmt.sqlite3_stmt, index), ""),
-                TryOrDefault (() => raw.sqlite3_column_origin_name(stmt.sqlite3_stmt, index), ""),
-                TryOrDefault (() => raw.sqlite3_column_table_name(stmt.sqlite3_stmt, index), ""),
-                raw.sqlite3_column_decltype(stmt.sqlite3_stmt, index));
+                raw.sqlite3_column_name(stmt.sqlite3_stmt, index).utf8_to_string(),
+                TryOrDefault(
+                    () => raw.sqlite3_column_database_name(stmt.sqlite3_stmt, index).utf8_to_string(),
+                    string.Empty),
+                TryOrDefault(
+                    () => raw.sqlite3_column_origin_name(stmt.sqlite3_stmt, index).utf8_to_string(),
+                    string.Empty),
+                TryOrDefault(
+                    () => raw.sqlite3_column_table_name(stmt.sqlite3_stmt, index).utf8_to_string(),
+                    string.Empty),
+                raw.sqlite3_column_decltype(stmt.sqlite3_stmt, index).utf8_to_string());
 
         /// <summary>
         /// The column name.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/column_name.html"/>
-        public  string Name { get; }
+        public string Name { get; }
 
         /// <summary>
         /// The database that is the origin of this particular result column.
@@ -158,7 +164,7 @@ namespace SQLitePCL.pretty
 
         /// <inheritdoc/>
         public override bool Equals(object other) =>
-            other is ColumnInfo && this == (ColumnInfo)other;
+            other is ColumnInfo culumnInfo && this == culumnInfo;
 
         /// <inheritdoc/>
         public override int GetHashCode()

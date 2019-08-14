@@ -171,7 +171,7 @@ namespace SQLitePCL.pretty
             {
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-                return raw.sqlite3_sql(this.sqlite3_stmt);
+                return raw.sqlite3_sql(this.sqlite3_stmt).utf8_to_string();
             }
         }
 
@@ -361,9 +361,9 @@ namespace SQLitePCL.pretty
         }
 
         public string Name =>
-            raw.sqlite3_bind_parameter_name(stmt, index + 1);
+            raw.sqlite3_bind_parameter_name(stmt, index + 1).utf8_to_string();
 
-        public void Bind(byte[] blob)
+        public void Bind(ReadOnlySpan<byte> blob)
         {
             Contract.Requires(blob != null);
 
@@ -560,7 +560,7 @@ namespace SQLitePCL.pretty
 
             //FIXME: Handle errors?
             raw.sqlite3_blob_close(blob);
-            
+
             disposed = true;
             db.Disposing -= dbDisposing;
 
@@ -578,7 +578,7 @@ namespace SQLitePCL.pretty
 
             // At this point we're guaranteed that position is an int between 0 and length
             int numBytes = Math.Min(length - (int)position, count);
-            int rc = raw.sqlite3_blob_read(blob, buffer, offset, numBytes, (int)position);
+            int rc = raw.sqlite3_blob_read(blob, new Span<byte>(buffer, offset, numBytes), (int)position);
             CheckOkOrThrowIOException(rc);
 
             position += numBytes;
@@ -634,7 +634,7 @@ namespace SQLitePCL.pretty
             // At this point we're guaranteed that position is an int between 0 and length
             int numBytes = Math.Min(length - (int)position, count);
 
-            int rc = raw.sqlite3_blob_write(blob, buffer, offset, numBytes, (int)position);
+            int rc = raw.sqlite3_blob_write(blob, new Span<byte>(buffer, offset, numBytes), (int)position);
             CheckOkOrThrowIOException(rc);
 
             position += numBytes;

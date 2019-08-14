@@ -1095,7 +1095,7 @@ namespace SQLitePCL.pretty
 
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
-            filename = raw.sqlite3_db_filename(db, database);
+            filename = raw.sqlite3_db_filename(db, database).utf8_to_string();
 
             // If there is no attached database N on the database connection, or
             // if database N is a temporary or in-memory database, then a NULL pointer is returned.

@@ -31,7 +31,7 @@ namespace SQLitePCL.pretty
 
             if (SQLite3.Version.CompareTo(SQLiteVersion.Of(3007015)) >= 0)
             {
-                msg = raw.sqlite3_errstr(rc);
+                msg = raw.sqlite3_errstr(rc).utf8_to_string();
             }
 
             if (raw.SQLITE_OK != rc)
@@ -45,7 +45,7 @@ namespace SQLitePCL.pretty
             int extended = raw.sqlite3_extended_errcode(db);
             if (raw.SQLITE_OK != rc)
             {
-                throw SQLiteException.Create(rc, extended, raw.sqlite3_errmsg(db));
+                throw SQLiteException.Create(rc, extended, raw.sqlite3_errmsg(db).utf8_to_string());
             }
         }
 

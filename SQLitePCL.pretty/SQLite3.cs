@@ -15,7 +15,6 @@
    limitations under the License.
 */
 
-using System;
 using System.Collections.Generic;
 
 namespace SQLitePCL.pretty
@@ -30,7 +29,7 @@ namespace SQLitePCL.pretty
         {
             for (int i = 0; ; i++)
             {
-                var option = raw.sqlite3_compileoption_get(i);
+                var option = raw.sqlite3_compileoption_get(i).utf8_to_string();
                 if (option != null)
                 {
                     yield return option;
@@ -77,7 +76,7 @@ namespace SQLitePCL.pretty
         /// The SQLite source id.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/libversion.html"/>
-        public static string SourceId => raw.sqlite3_sourceid();
+        public static string SourceId => raw.sqlite3_sourceid().utf8_to_string();
 
         /// <summary>
         /// Returns the number of bytes of memory currently outstanding (malloced but not freed) by SQLite.
