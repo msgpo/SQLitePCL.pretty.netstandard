@@ -80,7 +80,7 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(This != null);
             This.Bind(Convert.ToDouble(value));
-        }            
+        }
 
         /// <summary>
         /// Bind the parameter to an <see cref="Guid"/>.
@@ -124,7 +124,7 @@ namespace SQLitePCL.pretty
 
             This.Bind(value.ToString());
         }
-                    
+
         /// <summary>
         /// Bind the parameter to a value based upon its runtime type.
         /// </summary>
@@ -148,7 +148,7 @@ namespace SQLitePCL.pretty
                 This.BindNull();
                 return;
             }
-                
+
             Type t = obj.GetType();
 
             if (typeof(string) == t) { This.Bind((string)obj); }
@@ -160,16 +160,16 @@ namespace SQLitePCL.pretty
                 || (typeof(Int16) == t)
                 || (typeof(sbyte) == t)
                 || (typeof(Int64) == t)
-                || (typeof(UInt32) == t))                                                     { This.Bind((long)(Convert.ChangeType(obj, typeof(long)))); }
-            else if ((typeof(double) == t) || (typeof(float) == t) || (typeof(decimal) == t)) { This.Bind((double)(Convert.ChangeType(obj, typeof(double)))); }
+                || (typeof(UInt32) == t))                                                     { This.Bind((long)Convert.ChangeType(obj, typeof(long))); }
+            else if ((typeof(double) == t) || (typeof(float) == t) || (typeof(decimal) == t)) { This.Bind((double)Convert.ChangeType(obj, typeof(double))); }
             else if (typeof(byte[]) == t)                                                     { This.Bind((byte[]) obj); }
             else if (t.GetTypeInfo().ImplementedInterfaces.Contains(typeof(ISQLiteValue)))    { This.Bind((ISQLiteValue)obj); }
-            else if (obj is TimeSpan)                                                         { This.Bind((TimeSpan)obj); }
-            else if (obj is DateTime)                                                         { This.Bind((DateTime) obj); }
-            else if (obj is DateTimeOffset)                                                   { This.Bind((DateTimeOffset) obj); }
-            else if (obj is Guid)                                                             { This.Bind((Guid) obj); }
-            else if (obj is Stream)                                                           { This.Bind((Stream) obj); }
-            else if (obj is Uri)                                                              { This.Bind((Uri) obj); }
+            else if (obj is TimeSpan span)                                                    { This.Bind(span); }
+            else if (obj is DateTime time)                                                    { This.Bind(time); }
+            else if (obj is DateTimeOffset offset)                                            { This.Bind(offset); }
+            else if (obj is Guid guid)                                                        { This.Bind(guid); }
+            else if (obj is Stream stream)                                                    { This.Bind(stream); }
+            else if (obj is Uri uri)                                                          { This.Bind(uri); }
             else
             {
                 throw new ArgumentException($"Invalid type conversion {t}");

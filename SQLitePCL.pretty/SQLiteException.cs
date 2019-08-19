@@ -63,6 +63,7 @@ namespace SQLitePCL.pretty
             {
                 return new OperationCanceledException(msg, exp);
             }
+
             return exp;
         }
 

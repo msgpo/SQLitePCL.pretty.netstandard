@@ -41,16 +41,11 @@ namespace SQLitePCL.pretty
             }
         }
 
-        private static readonly IEnumerable<string> compilerOptions =
-            new DelegatingEnumerable<string>(CompilerOptionsEnumerator);
-
         /// <summary>
         /// The SQLite compiler options that were defined at compile time.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/compileoption_get.html"/>
-        public static IEnumerable<string> CompilerOptions => compilerOptions;
-
-        private static readonly SQLiteVersion version = SQLiteVersion.Of(raw.sqlite3_libversion_number());
+        public static IEnumerable<string> CompilerOptions { get; } = new DelegatingEnumerable<string>(CompilerOptionsEnumerator);
 
         /// <summary>
         /// Enables or disables the sharing of the database cache and schema data structures
@@ -70,7 +65,7 @@ namespace SQLitePCL.pretty
         /// The SQLite version.
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/libversion.html"/>
-        public static SQLiteVersion Version => version;
+        public static SQLiteVersion Version { get; } = SQLiteVersion.Of(raw.sqlite3_libversion_number());
 
         /// <summary>
         /// The SQLite source id.
@@ -157,7 +152,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Retrieve runtime status information about the 
+        /// Retrieve runtime status information about the
         /// performance of SQLite, and optionally to reset various highwater marks.
         /// </summary>
         /// <seealso href="https://www.sqlite.org/c3ref/status.html"/>

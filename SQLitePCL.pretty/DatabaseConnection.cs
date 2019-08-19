@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace SQLitePCL.pretty
 {
@@ -148,7 +147,7 @@ namespace SQLitePCL.pretty
             int nLog;
             int nCkpt;
 
-            // If parameter zDb is NULL or points to a zero length string, then the specified operation is 
+            // If parameter zDb is NULL or points to a zero length string, then the specified operation is
             // attempted on all WAL databases attached to database connection db
             This.WalCheckPoint("", WalCheckPointMode.Passive, out nLog, out nCkpt);
         }*/
@@ -262,10 +261,9 @@ namespace SQLitePCL.pretty
 
         private static IEnumerator<IStatement> PrepareAllEnumerator(this IDatabaseConnection This, string sql)
         {
-            for (var next = sql; next != null; )
+            for (var next = sql; next.Length != 0;)
             {
-                string tail;
-                IStatement stmt = This.PrepareStatement(next, out tail);
+                IStatement stmt = This.PrepareStatement(next, out string tail);
                 next = tail;
                 yield return stmt;
             }
@@ -296,12 +294,12 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(This != null);
 
-            string tail;
-            IStatement retval = This.PrepareStatement(sql, out tail);
-            if (tail != null)
+            IStatement retval = This.PrepareStatement(sql, out string tail);
+            if (tail.Length != 0)
             {
-                throw new ArgumentException("SQL contains more than one statment");
+                throw new ArgumentException("SQL contains more than one statement");
             }
+
             return retval;
         }
 
@@ -318,9 +316,7 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(This != null);
 
-            string filename;
-
-            if (This.TryGetFileName(database, out filename))
+            if (This.TryGetFileName(database, out string filename))
             {
                 return filename;
             }
@@ -369,7 +365,7 @@ namespace SQLitePCL.pretty
         public static void Vacuum(this IDatabaseConnection This) =>
             This.Execute(SQLBuilder.Vacuum);
     }
-        
+
     internal class DelegatingDatabaseConnection : IDatabaseConnection, IDisposable
     {
         private readonly IDatabaseConnection db;
@@ -452,7 +448,10 @@ namespace SQLitePCL.pretty
 
         public IStatement PrepareStatement(string sql, out string tail)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
 
             return db.PrepareStatement(sql, out tail);
         }

@@ -11,7 +11,7 @@ namespace SQLitePCL.pretty
     public sealed class SQLiteDatabaseConnectionBuilder
     {
         /// <summary>
-        /// Returns a <see cref="SQLiteDatabaseConnectionBuilder"/> that 
+        /// Returns a <see cref="SQLiteDatabaseConnectionBuilder"/> that
         /// creates in memory <see cref="SQLiteDatabaseConnection"/> instances.
         /// </summary>
         public static SQLiteDatabaseConnectionBuilder InMemory { get; } =
@@ -23,7 +23,7 @@ namespace SQLitePCL.pretty
         /// <param name="fileName">The filename of the database file.</param>
         /// <param name="autoCheckPointCount">
         ///     The number of frames in the write-ahead log file that causes any database on
-        ///     database connection D to automatically checkpoint. 
+        ///     database connection D to automatically checkpoint.
         ///     See: <see href="https://www.sqlite.org/c3ref/wal_autocheckpoint.html"/>
         /// </param>
         /// <param name="authorizer">
@@ -31,7 +31,7 @@ namespace SQLitePCL.pretty
         ///     See: <see href="https://www.sqlite.org/c3ref/set_authorizer.html"/>
         /// </param>
         /// <param name="busyTimeout">
-        ///    The specified amount of time a connection sleeps when a table is locked. 
+        ///    The specified amount of time a connection sleeps when a table is locked.
         ///    See: <see href="https://www.sqlite.org/c3ref/busy_timeout.html"/>
         /// </param>
         /// <param name="commitHook">
@@ -46,12 +46,12 @@ namespace SQLitePCL.pretty
         ///     See: <see href="https://www.sqlite.org/c3ref/progress_handler.html"/>
         /// </param>
         /// <param name="progressHandlerInterval">
-        ///     The approximate number of virtual machine instructions that are evaluated between 
+        ///     The approximate number of virtual machine instructions that are evaluated between
         ///     successive invocations of the <paramref name="progressHandler"/> callback.
         ///     See: <see href="https://www.sqlite.org/c3ref/progress_handler.html"/>
         /// </param>
         /// <param name="vfs">
-        /// 
+        ///
         /// </param>
         /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public static SQLiteDatabaseConnectionBuilder Create(
@@ -90,7 +90,7 @@ namespace SQLitePCL.pretty
             string vfs,
             IDictionary<Tuple<string, int>, Tuple<delegate_function_aggregate_step, delegate_function_aggregate_final>> aggFuncs,
             IDictionary<Tuple<string, int>, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue>> scalarFuncs,
-            IDictionary<string, Comparison<string>> collationFuncs) 
+            IDictionary<string, Comparison<string>> collationFuncs)
         {
             Contract.Requires(fileName != null);
             Contract.Requires(autoCheckPointCount >= 0);
@@ -111,7 +111,7 @@ namespace SQLitePCL.pretty
                 scalarFuncs,
                 collationFuncs);
         }
-  
+
         private readonly IDictionary<Tuple<string, int>, Tuple<delegate_function_aggregate_step, delegate_function_aggregate_final>> aggFuncs;
         private readonly IDictionary<Tuple<string, int>, Func<IReadOnlyList<ISQLiteValue>, ISQLiteValue>> scalarFuncs;
         private readonly IDictionary<string, Comparison<string>> collationFuncs;
@@ -156,7 +156,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Build a <see cref="SQLiteDatabaseConnection"/> instance. 
+        /// Build a <see cref="SQLiteDatabaseConnection"/> instance.
         /// </summary>
         /// <returns>A <see cref="SQLiteDatabaseConnection"/> instance.</returns>
         public SQLiteDatabaseConnection Build()
@@ -166,7 +166,9 @@ namespace SQLitePCL.pretty
                 int rc = raw.sqlite3_open_v2(this.fileName, out db, (int)this.connectionFlags, this.vfs);
                 SQLiteException.CheckOk(db, rc);
             }
-                
+
+            db.enable_sqlite3_next_stmt(true);
+
             foreach (var f in this.aggFuncs)
             {
                 var name = f.Key.Item1;
@@ -177,12 +179,12 @@ namespace SQLitePCL.pretty
                 int rc = raw.sqlite3_create_function(db, name, nArg, null, funcStep, funcFinal);
                 SQLiteException.CheckOk(db, rc);
             }
-                
+
             if (this.authorizer != null)
             {
                 int rc = raw.sqlite3_set_authorizer(db, (o, actionCode, p0, p1, dbName, triggerOrView) =>
                     (int)this.authorizer((ActionCode)actionCode, p0, p1, dbName, triggerOrView), null);
-                SQLiteException.CheckOk(rc);  
+                SQLiteException.CheckOk(rc);
             }
 
             if (this.autoCheckPointCount > 0)
@@ -196,7 +198,7 @@ namespace SQLitePCL.pretty
                 int rc = raw.sqlite3_busy_timeout(db, (int) this.busyTimeout.TotalMilliseconds);
                 SQLiteException.CheckOk(db, rc);
             }
-                
+
             foreach (var collation in this.collationFuncs)
             {
                 var name = collation.Key;
@@ -210,12 +212,12 @@ namespace SQLitePCL.pretty
             {
                 raw.sqlite3_commit_hook(db, v => this.commitHook() ? 1 : 0, null);
             }
-                
+
             if (this.progressHandler != null)
             {
                 raw.sqlite3_progress_handler(db, this.progressHandlerInterval, _ => this.progressHandler() ? 1 : 0, null);
             }
-                
+
             foreach (var f in this.scalarFuncs)
             {
                 var name = f.Key.Item1;
@@ -239,11 +241,11 @@ namespace SQLitePCL.pretty
         /// <summary>
         /// Creates a new <see cref="SQLiteDatabaseConnectionBuilder"/> with the provided parameters.
         /// </summary>
-        /// 
+        ///
         /// <param name="fileName">The filename of the database file.</param>
         /// <param name="autoCheckPointCount">
         ///     The number of frames in the write-ahead log file that causes any database on
-        ///     database connection D to automatically checkpoint. 
+        ///     database connection D to automatically checkpoint.
         ///     See: <see href="https://www.sqlite.org/c3ref/wal_autocheckpoint.html"/>
         /// </param>
         /// <param name="authorizer">
@@ -251,7 +253,7 @@ namespace SQLitePCL.pretty
         ///     See: <see href="https://www.sqlite.org/c3ref/set_authorizer.html"/>
         /// </param>
         /// <param name="busyTimeout">
-        ///    The specified amount of time a connection sleeps when a table is locked. 
+        ///    The specified amount of time a connection sleeps when a table is locked.
         ///    See: <see href="https://www.sqlite.org/c3ref/busy_timeout.html"/>
         /// </param>
         /// <param name="commitHook">
@@ -266,12 +268,12 @@ namespace SQLitePCL.pretty
         ///     See: <see href="https://www.sqlite.org/c3ref/progress_handler.html"/>
         /// </param>
         /// <param name="progressHandlerInterval">
-        ///     The approximate number of virtual machine instructions that are evaluated between 
+        ///     The approximate number of virtual machine instructions that are evaluated between
         ///     successive invocations of the <paramref name="progressHandler"/> callback.
         ///     See: <see href="https://www.sqlite.org/c3ref/progress_handler.html"/>
         /// </param>
         /// <param name="vfs">
-        /// 
+        ///
         /// </param>
         /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
         public SQLiteDatabaseConnectionBuilder With(
@@ -283,7 +285,7 @@ namespace SQLitePCL.pretty
                 ConnectionFlags? connectionFlags = null,
                 Func<bool> progressHandler = null,
                 int? progressHandlerInterval = null,
-                string vfs = null) => 
+                string vfs = null) =>
             SQLiteDatabaseConnectionBuilder.Create(
                 fileName ?? this.fileName,
                 autoCheckPointCount ?? this.autoCheckPointCount,
@@ -302,11 +304,11 @@ namespace SQLitePCL.pretty
         /// Creates a new <see cref="SQLiteDatabaseConnectionBuilder"/> without the specified parameter.
         /// </summary>
         /// <param name="authorizer">
-        ///     if <see langword="true"/> removes the authorizer callback 
+        ///     if <see langword="true"/> removes the authorizer callback
         ///     from the new <see cref="SQLiteDatabaseConnectionBuilder"/> instance.
         /// </param>
         /// <param name="commitHook">
-        ///     if <see langword="true"/> removes the commitHook callback 
+        ///     if <see langword="true"/> removes the commitHook callback
         ///     from the new <see cref="SQLiteDatabaseConnectionBuilder"/> instance.
         /// </param>
         /// <param name="progressHandler">
@@ -321,7 +323,7 @@ namespace SQLitePCL.pretty
                 bool authorizer = false,
                 bool commitHook = false,
                 bool progressHandler = false,
-                bool vfs = false) => 
+                bool vfs = false) =>
             new SQLiteDatabaseConnectionBuilder(
                 this.fileName,
                 this.autoCheckPointCount,
@@ -848,7 +850,7 @@ namespace SQLitePCL.pretty
         /// Returns a <see cref="SQLiteDatabaseConnectionBuilder"/> without any collation functions.
         /// </summary>
         /// <returns>A <see cref="SQLiteDatabaseConnectionBuilder"/> instance.</returns>
-        public SQLiteDatabaseConnectionBuilder WithoutCollations() => 
+        public SQLiteDatabaseConnectionBuilder WithoutCollations() =>
             new SQLiteDatabaseConnectionBuilder(
                 this.fileName,
                 this.autoCheckPointCount,
@@ -944,7 +946,7 @@ namespace SQLitePCL.pretty
         /// </summary>
         /// <seealso href="https://sqlite.org/c3ref/update_hook.html"/>
         public event EventHandler<DatabaseUpdateEventArgs> Update = (o, e) => { };
-            
+
         internal event EventHandler Disposing = (o, e) => { };
 
         /// <inheritdoc/>
@@ -995,7 +997,7 @@ namespace SQLitePCL.pretty
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
                 return raw.sqlite3_last_insert_rowid(db);
             }
-        }   
+        }
 
         /// <summary>
         /// An enumeration of the connection's currently opened statements in the order they were prepared.
@@ -1007,7 +1009,7 @@ namespace SQLitePCL.pretty
                 if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
                 // Reverse the order of the statements to match the order returned by SQLite.
-                // Side benefit of preventing callers from being able to cast the statement 
+                // Side benefit of preventing callers from being able to cast the statement
                 // list and do evil things see: http://stackoverflow.com/a/491591
                 return this.statements.Reverse();
             }
@@ -1060,7 +1062,7 @@ namespace SQLitePCL.pretty
         {
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
             raw.sqlite3_interrupt(db);
-        }   
+        }
 
         /// <inheritdoc/>
         public bool IsDatabaseReadOnly(string dbName)
@@ -1109,10 +1111,19 @@ namespace SQLitePCL.pretty
             Contract.Requires(tableName != null);
             Contract.Requires(columnName != null);
 
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
 
-            sqlite3_blob blob;
-            int rc = raw.sqlite3_blob_open(db, database, tableName, columnName, rowId, canWrite ? 1 : 0, out blob);
+            int rc = raw.sqlite3_blob_open(
+                db,
+                database,
+                tableName,
+                columnName,
+                rowId,
+                canWrite ? 1 : 0,
+                out sqlite3_blob blob);
             SQLiteException.CheckOk(db, rc);
 
             var length = raw.sqlite3_blob_bytes(blob);
@@ -1125,10 +1136,12 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(sql != null);
 
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
 
-            sqlite3_stmt stmt;
-            int rc = raw.sqlite3_prepare_v2(db, sql, out stmt, out tail);
+            int rc = raw.sqlite3_prepare_v2(db, sql, out sqlite3_stmt stmt, out tail);
             SQLiteException.CheckOk(db, rc);
 
             var result = new StatementImpl(stmt, this);
@@ -1155,10 +1168,10 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(dbName != null);
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-            int rc = raw.sqlite3_wal_checkpoint_v2(db, dbName, (int) mode, out nLog, out nCkpt);
+            int rc = raw.sqlite3_wal_checkpoint_v2(db, dbName, (int)mode, out nLog, out nCkpt);
             SQLiteException.CheckOk(db, rc);
         }
-         
+
         /// <inheritdoc/>
         public void Dispose()
         {
