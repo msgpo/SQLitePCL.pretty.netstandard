@@ -16,7 +16,6 @@
 */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
@@ -100,13 +99,13 @@ namespace SQLitePCL.pretty
         /// <param name="values">The position indexed values to bind.</param>
         /// <returns>An <see cref="IEnumerable&lt;T&gt;"/> of rows in the result set.</returns>
         public static IEnumerable<IReadOnlyList<IResultSetValue>> Query(
-            this IStatement This, 
+            this IStatement This,
             params object[] values)
         {
             Contract.Requires(This != null);
             Contract.Requires(values != null);
 
-            return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() => 
+            return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() =>
                 {
                     This.Reset();
                     This.ClearBindings();
@@ -124,7 +123,7 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(This != null);
 
-            return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() => 
+            return new DelegatingEnumerable<IReadOnlyList<IResultSetValue>>(() =>
                 {
                     This.Reset();
                     return This.Enumerate();

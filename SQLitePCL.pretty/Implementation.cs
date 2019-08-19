@@ -217,7 +217,10 @@ namespace SQLitePCL.pretty
 
         public bool MoveNext()
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed)
+            {
+                throw new ObjectDisposedException(this.GetType().FullName);
+            }
 
             if (mustReset)
             {
@@ -247,10 +250,10 @@ namespace SQLitePCL.pretty
             if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
 
             // FIXME: Ignore the result code?
-            // If the most recent call to sqlite3_step(S) for the prepared statement S 
-            // returned SQLITE_ROW or SQLITE_DONE, or if sqlite3_step(S) has never before been 
+            // If the most recent call to sqlite3_step(S) for the prepared statement S
+            // returned SQLITE_ROW or SQLITE_DONE, or if sqlite3_step(S) has never before been
             // called on S, then sqlite3_reset(S) returns SQLITE_OK.
-            // If the most recent call to sqlite3_step(S) for the prepared statement S indicated an 
+            // If the most recent call to sqlite3_step(S) for the prepared statement S indicated an
             // error, then sqlite3_reset(S) returns an appropriate error code.
 
             mustReset = false;
@@ -365,8 +368,6 @@ namespace SQLitePCL.pretty
 
         public void Bind(ReadOnlySpan<byte> blob)
         {
-            Contract.Requires(blob != null);
-
             int rc = raw.sqlite3_bind_blob(stmt, index + 1, blob);
             SQLiteException.CheckOk(stmt, rc);
         }
