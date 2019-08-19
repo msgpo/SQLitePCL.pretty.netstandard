@@ -167,8 +167,6 @@ namespace SQLitePCL.pretty
                 SQLiteException.CheckOk(db, rc);
             }
 
-            db.enable_sqlite3_next_stmt(true);
-
             foreach (var f in this.aggFuncs)
             {
                 var name = f.Key.Item1;
