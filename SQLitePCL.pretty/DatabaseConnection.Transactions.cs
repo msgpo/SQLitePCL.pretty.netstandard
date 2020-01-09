@@ -1,16 +1,16 @@
 ﻿// Copyright (c) 2015 David Bordoley
 // Copyright (c) 2009-2015 Krueger Systems, Inc.
-// 
+//
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
 // in the Software without restriction, including without limitation the rights
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-// 
+//
 // The above copyright notice and this permission notice shall be included in
 // all copies or substantial portions of the Software.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,14 +21,7 @@
 //
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using System.IO;
 
 namespace SQLitePCL.pretty
 {
@@ -51,18 +44,18 @@ namespace SQLitePCL.pretty
         Deferred,
 
         /// <summary>
-        /// RESERVED locks are acquired on all databases as soon as the BEGIN command is 
+        /// RESERVED locks are acquired on all databases as soon as the BEGIN command is
         /// executed, without waiting for the database to be used.
         /// </summary>
-        Immediate, 
+        Immediate,
 
         /// <summary>
-        /// EXCLUSIVE locks acquired on all databases. No other database connection except for read_uncommitted connections 
-        /// will be able to read the database and no other connection without exception will be able to write the database 
+        /// EXCLUSIVE locks acquired on all databases. No other database connection except for read_uncommitted connections
+        /// will be able to read the database and no other connection without exception will be able to write the database
         /// until the transaction is complete.
         /// </summary>
         Exclusive
-    }    
+    }
 
     public static partial class DatabaseConnection
     {
@@ -73,23 +66,23 @@ namespace SQLitePCL.pretty
             var beginTransactionString = SQLBuilder.BeginTransactionWithMode(mode);
             This.Execute(beginTransactionString);
         }
-            
+
         private static string SaveTransactionPoint(this IDatabaseConnection This)
         {
             var savePoint = $"S{_rand.Value.Next(short.MaxValue)}";
             This.Execute(SQLBuilder.SavePoint(savePoint));
             return savePoint;
         }
-            
+
         private static void ReleaseTransaction(this IDatabaseConnection This, string savepoint) =>
             This.Execute(SQLBuilder.Release(savepoint));
-            
+
         private static void CommitTransaction(this IDatabaseConnection This) =>
             This.Execute(SQLBuilder.CommitTransaction);
-            
+
         private static void RollbackTransactionTo(this IDatabaseConnection This, string savepoint) =>
             This.Execute(SQLBuilder.RollbackTransactionTo(savepoint));
-            
+
         private static void RollbackTransaction(this IDatabaseConnection This) =>
             This.Execute(SQLBuilder.RollbackTransaction);
 
@@ -97,7 +90,7 @@ namespace SQLitePCL.pretty
         /// Runs the Action <paramref name="action"/> in a transaction and returns the function result.
         /// If the database is not currently in a transaction, a new transaction is created using
         /// the provided TransactionMode and committed. Otherwise the transaction is created within
-        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed.
         /// </summary>
         /// <param name="This">The database connection.</param>
         /// <param name="action">The Action to run in a transaction.</param>
@@ -110,7 +103,7 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(action != null);
 
-            This.RunInTransaction<object>(db => 
+            This.RunInTransaction<object>(db =>
                 {
                     action(db);
                     return null;
@@ -121,7 +114,7 @@ namespace SQLitePCL.pretty
         /// Runs the Action <paramref name="action"/> in a transaction and returns the function result.
         /// If the database is not currently in a transaction, a new transaction is created using
         /// BeginTransaction with TransactionMode.Deferred and committed. Otherwise the transaction is created within
-        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed.
         /// </summary>
         /// <param name="This">The database connection.</param>
         /// <param name="action">The Action to run in a transaction.</param>
@@ -133,7 +126,7 @@ namespace SQLitePCL.pretty
         /// Runs the function <paramref name="f"/> in a transaction and returns the function result.
         /// If the database is not currently in a transaction, a new transaction is created using
         /// the provided TransactionMode and committed. Otherwise the transaction is created within
-        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed.
         /// </summary>
         /// <returns>The function result.</returns>
         /// <param name="This">The database connection.</param>
@@ -174,14 +167,14 @@ namespace SQLitePCL.pretty
                     }
                     else
                     {
-                        db.CommitTransaction(); 
-                    } 
+                        db.CommitTransaction();
+                    }
 
                     return retval;
                 }
                 catch (Exception)
                 {
-                    if (savePoint != null) 
+                    if (savePoint != null)
                     {
                         db.RollbackTransactionTo(savePoint);
                     }
@@ -199,7 +192,7 @@ namespace SQLitePCL.pretty
         /// Runs the function <paramref name="f"/> in a transaction and returns the function result.
         /// If the database is not currently in a transaction, a new transaction is created using
         /// BeginTransaction with TransactionMode.Deferred and committed. Otherwise the transaction is created within
-        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed.
         /// </summary>
         /// <returns>The function result.</returns>
         /// <param name="This">The database connection.</param>
@@ -215,7 +208,7 @@ namespace SQLitePCL.pretty
         /// Runs the Action <paramref name="action"/> in a transaction and returns the function result.
         /// If the database is not currently in a transaction, a new transaction is created using
         /// the provided TransactionMode and committed. Otherwise the transaction is created within
-        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed.
         /// </summary>
         /// <returns><c>true</c>, if the transaction was committed or released <c>false</c> if it was rolledback.</returns>
         /// <param name="This">The database connection.</param>
@@ -228,19 +221,18 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(action != null);
 
-            object result;
-            return This.TryRunInTransaction<object>(db => 
-                { 
-                    action(db); 
-                    return null; 
-                }, mode, out result);
+            return This.TryRunInTransaction<object>(db =>
+                {
+                    action(db);
+                    return null;
+                }, mode, out _);
         }
 
         /// <summary>
         /// Runs the Action <paramref name="action"/> in a transaction and returns the function result.
         /// If the database is not currently in a transaction, a new transaction is created using
         /// BeginTransaction with TransactionMode.Deferred and committed. Otherwise the transaction is created within
-        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed.
         /// </summary>
         /// <returns><c>true</c>, if the transaction was committed or released <c>false</c> if it was rolledback.</returns>
         /// <param name="This">The database connection.</param>
@@ -252,7 +244,7 @@ namespace SQLitePCL.pretty
         /// Runs the function <paramref name="f"/> in a transaction and returns the function result.
         /// If the database is not currently in a transaction, a new transaction is created using
         /// the provided TransactionMode and committed. Otherwise the transaction is created within
-        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed.
         /// </summary>
         /// <returns><c>true</c>, if the transaction was committed or released <c>false</c> if it was rolledback.</returns>
         /// <param name="This">The database connection.</param>
@@ -275,7 +267,7 @@ namespace SQLitePCL.pretty
             }
             catch
             {
-                result = default(T);
+                result = default;
                 return false;
             }
         }
@@ -284,7 +276,7 @@ namespace SQLitePCL.pretty
         /// Runs the function <paramref name="f"/> in a transaction and returns the function result.
         /// If the database is not currently in a transaction, a new transaction is created using
         /// BeginTransaction with TransactionMode.Deferred and committed. Otherwise the transaction is created within
-        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed. 
+        /// a savepoint block but not fully committed to the database until the enclosing transaction is committed.
         /// </summary>
         /// <returns><c>true</c>, if the transaction was committed or released <c>false</c> if it was rolledback.</returns>
         /// <param name="This">The database connection.</param>

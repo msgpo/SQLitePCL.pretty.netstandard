@@ -128,10 +128,7 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(This != null);
 
-            int nLog;
-            int nCkpt;
-
-            This.WalCheckPoint(dbName, WalCheckPointMode.Passive, out nLog, out nCkpt);
+            This.WalCheckPoint(dbName, WalCheckPointMode.Passive, out _, out _);
         }
 
         /*
@@ -297,7 +294,7 @@ namespace SQLitePCL.pretty
             IStatement retval = This.PrepareStatement(sql, out string tail);
             if (tail.Length != 0)
             {
-                throw new ArgumentException("SQL contains more than one statement");
+                ThrowHelper.ThrowArgumentException("SQL contains more than one statement");
             }
 
             return retval;
@@ -316,12 +313,13 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(This != null);
 
-            if (This.TryGetFileName(database, out string filename))
+            if (!This.TryGetFileName(database, out string filename))
             {
-                return filename;
+                ThrowHelper.ThrowInvalidOperationException("Database is either not attached, temporary or in memory");
             }
 
-            throw new InvalidOperationException("Database is either not attached, temporary or in memory");
+            return filename;
+
         }
 
         /// <summary>
@@ -381,7 +379,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
                 return db.IsAutoCommit;
             }
         }
@@ -390,7 +388,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
                 return db.IsReadOnly;
             }
         }
@@ -399,7 +397,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
                 return db.Changes;
             }
         }
@@ -408,7 +406,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
                 return db.TotalChanges;
             }
         }
@@ -417,32 +415,32 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
                 return db.LastInsertedRowId;
             }
         }
 
         public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
             db.WalCheckPoint(dbName, mode, out nLog, out nCkpt);
         }
 
         public bool IsDatabaseReadOnly(string dbName)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
             return db.IsDatabaseReadOnly(dbName);
         }
 
         public TableColumnMetadata GetTableColumnMetadata(string dbName, string tableName, string columnName)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
             return db.GetTableColumnMetadata(dbName, tableName, columnName);
         }
 
         public Stream OpenBlob(string database, string tableName, string columnName, long rowId, bool canWrite)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
             return db.OpenBlob(database, tableName, columnName, rowId, canWrite);
         }
 
@@ -450,7 +448,7 @@ namespace SQLitePCL.pretty
         {
             if (disposed)
             {
-                throw new ObjectDisposedException(this.GetType().FullName);
+                ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName);
             }
 
             return db.PrepareStatement(sql, out tail);
@@ -458,7 +456,7 @@ namespace SQLitePCL.pretty
 
         public void Status(DatabaseConnectionStatusCode statusCode, out int current, out int highwater, bool reset)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
             this.db.Status(statusCode, out current, out highwater, reset);
         }
 

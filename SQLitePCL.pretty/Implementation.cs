@@ -47,7 +47,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
                 return raw.sqlite3_backup_pagecount(backup);
             }
@@ -57,7 +57,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
                 return raw.sqlite3_backup_remaining(backup);
             }
@@ -77,7 +77,7 @@ namespace SQLitePCL.pretty
 
         public bool Step(int nPages)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
             int rc = raw.sqlite3_backup_step(backup, nPages);
 
@@ -127,7 +127,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
                 return stmt;
             }
@@ -137,7 +137,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
                 return bindParameters;
             }
@@ -147,7 +147,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
                 return columns;
             }
@@ -157,7 +157,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
                 return current;
             }
@@ -169,7 +169,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
                 return raw.sqlite3_sql(this.sqlite3_stmt).utf8_to_string();
             }
@@ -179,7 +179,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
                 return raw.sqlite3_stmt_readonly(this.sqlite3_stmt) != 0;
             }
@@ -189,7 +189,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
                 return raw.sqlite3_stmt_busy(this.sqlite3_stmt) != 0;
             }
@@ -197,7 +197,7 @@ namespace SQLitePCL.pretty
 
         public void ClearBindings()
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
             int rc = raw.sqlite3_clear_bindings(this.sqlite3_stmt);
             SQLiteException.CheckOk(this.sqlite3_stmt, rc);
@@ -219,7 +219,7 @@ namespace SQLitePCL.pretty
         {
             if (disposed)
             {
-                throw new ObjectDisposedException(this.GetType().FullName);
+                ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName);
             }
 
             if (mustReset)
@@ -247,7 +247,7 @@ namespace SQLitePCL.pretty
 
         public void Reset()
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
             // FIXME: Ignore the result code?
             // If the most recent call to sqlite3_step(S) for the prepared statement S
@@ -263,7 +263,7 @@ namespace SQLitePCL.pretty
 
         public int Status(StatementStatusCode statusCode, bool reset)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
             return raw.sqlite3_stmt_status(stmt, (int) statusCode, reset ? 1 : 0);
         }
     }
@@ -289,7 +289,7 @@ namespace SQLitePCL.pretty
             {
                 if (index < 0 || index >= this.Count)
                 {
-                    throw new ArgumentOutOfRangeException();
+                    ThrowHelper.ThrowArgumentOutOfRangeException();
                 }
 
                 return new BindParameterImpl(stmt.sqlite3_stmt, index);
@@ -300,13 +300,13 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                IBindParameter value;
-                if (this.TryGetValue(key, out value))
+                if (this.TryGetValue(key, out IBindParameter value))
                 {
-                    return value;
+                    ThrowHelper.ThrowKeyNotFoundException();
                 }
 
-                throw new KeyNotFoundException();
+                return value;
+
             }
         }
 
@@ -322,8 +322,7 @@ namespace SQLitePCL.pretty
         public bool ContainsKey(string key)
         {
             Contract.Requires(key != null);
-            int i;
-            return this.TryGetBindParameterIndex(key, out i);
+            return this.TryGetBindParameterIndex(key, out _);
         }
 
         public IEnumerator<KeyValuePair<string, IBindParameter>> GetEnumerator()
@@ -340,8 +339,7 @@ namespace SQLitePCL.pretty
 
         public bool TryGetValue(string key, out IBindParameter value)
         {
-            int i;
-            if (this.TryGetBindParameterIndex(key, out i))
+            if (this.TryGetBindParameterIndex(key, out int i))
             {
                 value = this[i];
                 return true;
@@ -428,7 +426,7 @@ namespace SQLitePCL.pretty
             {
                 if (index < 0 || index >= this.Count)
                 {
-                    throw new ArgumentOutOfRangeException();
+                    ThrowHelper.ThrowArgumentOutOfRangeException();
                 }
 
                 return ColumnInfo.Create(stmt, index);
@@ -479,7 +477,7 @@ namespace SQLitePCL.pretty
             {
                 if (index < 0 || index >= this.Count)
                 {
-                    throw new ArgumentOutOfRangeException();
+                    ThrowHelper.ThrowArgumentOutOfRangeException();
                 }
 
                 return stmt.ResultSetValueAt(index);
@@ -497,7 +495,7 @@ namespace SQLitePCL.pretty
             }
             catch (SQLiteException e)
             {
-                throw new IOException("Received SQLiteExcepction", e);
+                ThrowHelper.ThrowIOException("Received SQLiteException", e);
             }
         }
 
@@ -531,7 +529,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
                 return length;
             }
@@ -541,14 +539,14 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
                 return position;
             }
 
             set
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-                if (value < 0) { throw new ArgumentOutOfRangeException("value", "Position cannot be negative"); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
+                if (value < 0) { ThrowHelper.ThrowArgumentOutOfRangeException("value", "Position cannot be negative"); }
 
                 position = value;
             }
@@ -574,7 +572,7 @@ namespace SQLitePCL.pretty
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
             if (position >= length) { return 0; }
 
             // At this point we're guaranteed that position is an int between 0 and length
@@ -588,7 +586,7 @@ namespace SQLitePCL.pretty
 
         public override long Seek(long offset, SeekOrigin origin)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
             long newPosition;
             switch (origin)
@@ -610,11 +608,13 @@ namespace SQLitePCL.pretty
                     }
                 default:
                     {
-                        throw new ArgumentException();
+                        ThrowHelper.ThrowArgumentException();
+                        newPosition = 0; // Unreachable
+                        break;
                     }
             }
 
-            if (newPosition < 0) { throw new IOException(); }
+            if (newPosition < 0) { ThrowHelper.ThrowIOException(); }
 
             position = newPosition;
             return position;
@@ -627,8 +627,8 @@ namespace SQLitePCL.pretty
 
         public override void Write(byte[] buffer, int offset, int count)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
-            if (!canWrite) { throw new NotSupportedException(); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
+            if (!canWrite) { ThrowHelper.ThrowNotSupportedException(); }
 
             if (position >= length) { return; }
 
