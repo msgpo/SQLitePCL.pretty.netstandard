@@ -300,7 +300,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (this.TryGetValue(key, out IBindParameter value))
+                if (!this.TryGetValue(key, out IBindParameter value))
                 {
                     ThrowHelper.ThrowKeyNotFoundException();
                 }
