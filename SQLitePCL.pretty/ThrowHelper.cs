@@ -14,6 +14,10 @@ namespace SQLitePCL.pretty
     /// <summary>
     /// Provides methods for throwing common exceptions.
     /// </summary>
+    /// <remarks>
+    /// When a method contains a throw statement, the JIT will not inline it.
+    /// The common trick to solve this is to add a static "throw helper" method to do the dirty work for you.
+    /// </remarks>
     public static class ThrowHelper
     {
         /// <summary>
