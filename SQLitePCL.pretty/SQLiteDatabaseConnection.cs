@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.IO;
 
 namespace SQLitePCL.pretty
@@ -224,7 +223,12 @@ namespace SQLitePCL.pretty
 
                 int rc = raw.sqlite3_create_function(db, name, nArg, null, (ctx, ud, args) =>
                     {
-                        IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => value.ToSQLiteValue()).ToList();
+                        var len = args.Length;
+                        ISQLiteValue[] iArgs = new ISQLiteValue[len];
+                        for (int i = 0; i < len; i++)
+                        {
+                            iArgs[i] = args[i].ToSQLiteValue();
+                        }
 
                         // FIXME: https://github.com/ericsink/SQLitePCL.raw/issues/30
                         ISQLiteValue result = reduce(iArgs);
@@ -397,7 +401,12 @@ namespace SQLitePCL.pretty
                         state = (CtxState<T>)ctx.state;
                     }
 
-                    IReadOnlyList<ISQLiteValue> iArgs = args.Select(value => value.ToSQLiteValue()).ToList();
+                    var len = args.Length;
+                    ISQLiteValue[] iArgs = new ISQLiteValue[len];
+                    for (int i = 0; i < len; i++)
+                    {
+                        iArgs[i] = args[i].ToSQLiteValue();
+                    }
 
                     T next = func(state.Value, iArgs);
                     ctx.state = new CtxState<T>(next);
@@ -952,7 +961,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
                 return raw.sqlite3_get_autocommit(db) != 0;
             }
         }
@@ -962,7 +971,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
                 return raw.sqlite3_db_readonly(db, null) != 0;
             }
         }
@@ -972,7 +981,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
                 return raw.sqlite3_changes(db);
             }
         }
@@ -982,7 +991,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
                 return raw.sqlite3_total_changes(db);
             }
         }
@@ -992,7 +1001,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
                 return raw.sqlite3_last_insert_rowid(db);
             }
         }
@@ -1004,7 +1013,7 @@ namespace SQLitePCL.pretty
         {
             get
             {
-                if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+                if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
                 // Reverse the order of the statements to match the order returned by SQLite.
                 // Side benefit of preventing callers from being able to cast the statement
@@ -1028,7 +1037,7 @@ namespace SQLitePCL.pretty
             Contract.Requires(destConn != null);
             Contract.Requires(destDbName != null);
 
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
             sqlite3_backup backup = raw.sqlite3_backup_init(destConn.db, destDbName, db, dbName);
             var result = new DatabaseBackupImpl(backup, this, destConn);
@@ -1058,7 +1067,7 @@ namespace SQLitePCL.pretty
         /// <seealso href="https://www.sqlite.org/c3ref/interrupt.html"/>
         public void Interrupt()
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
             raw.sqlite3_interrupt(db);
         }
 
@@ -1066,7 +1075,7 @@ namespace SQLitePCL.pretty
         public bool IsDatabaseReadOnly(string dbName)
         {
             Contract.Requires(dbName != null);
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
             int rc = raw.sqlite3_db_readonly(db, dbName);
             switch (rc)
             {
@@ -1075,7 +1084,8 @@ namespace SQLitePCL.pretty
                 case 0:
                     return false;
                 default:
-                    throw new ArgumentException("Not the name of a database on the connection.");
+                    ThrowHelper.ThrowArgumentException("Not the name of a database on the connection.");
+                    return false; // Unreachable
             }
         }
 
@@ -1093,13 +1103,13 @@ namespace SQLitePCL.pretty
         {
             Contract.Requires(database != null);
 
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
             filename = raw.sqlite3_db_filename(db, database).utf8_to_string();
 
             // If there is no attached database N on the database connection, or
             // if database N is a temporary or in-memory database, then a NULL pointer is returned.
-            return !String.IsNullOrEmpty(filename);
+            return !string.IsNullOrEmpty(filename);
         }
 
         /// <inheritdoc/>
@@ -1111,7 +1121,7 @@ namespace SQLitePCL.pretty
 
             if (disposed)
             {
-                throw new ObjectDisposedException(this.GetType().FullName);
+                ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName);
             }
 
             int rc = raw.sqlite3_blob_open(
@@ -1136,7 +1146,7 @@ namespace SQLitePCL.pretty
 
             if (disposed)
             {
-                throw new ObjectDisposedException(this.GetType().FullName);
+                ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName);
             }
 
             int rc = raw.sqlite3_prepare_v2(db, sql, out sqlite3_stmt stmt, out tail);
@@ -1155,7 +1165,7 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public void Status(DatabaseConnectionStatusCode statusCode, out int current, out int highwater, bool reset)
         {
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
 
             int rc = raw.sqlite3_db_status(db, (int)statusCode, out current, out highwater, reset ? 1 : 0);
             SQLiteException.CheckOk(rc);
@@ -1165,7 +1175,7 @@ namespace SQLitePCL.pretty
         public void WalCheckPoint(string dbName, WalCheckPointMode mode, out int nLog, out int nCkpt)
         {
             Contract.Requires(dbName != null);
-            if (disposed) { throw new ObjectDisposedException(this.GetType().FullName); }
+            if (disposed) { ThrowHelper.ThrowObjectDisposedException(this.GetType().FullName); }
             int rc = raw.sqlite3_wal_checkpoint_v2(db, dbName, (int)mode, out nLog, out nCkpt);
             SQLiteException.CheckOk(db, rc);
         }

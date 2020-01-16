@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace SQLitePCL.pretty
 {
     internal sealed class OrderedSet<T> : ICollection<T>
     {
-        private static IEnumerator<T> Reverse(LinkedList<T> list) 
+        private static IEnumerator<T> Reverse(LinkedList<T> list)
         {
             var el = list.Last;
-            while (el != null) 
+            while (el != null)
             {
                 yield return el.Value;
                 el = el.Previous;
@@ -45,12 +44,12 @@ namespace SQLitePCL.pretty
 
         public bool Remove(T item)
         {
-            LinkedListNode<T> value;
-            if (set.TryGetValue(item, out value))
+            if (set.TryGetValue(item, out LinkedListNode<T> value))
             {
                 set.Remove(item);
                 list.Remove(value);
             }
+
             return false;
         }
 

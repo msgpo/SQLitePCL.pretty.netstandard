@@ -16,6 +16,7 @@
 */
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace SQLitePCL.pretty
 {
@@ -27,7 +28,7 @@ namespace SQLitePCL.pretty
     {
         internal static void CheckOk(int rc)
         {
-            string msg = "";
+            string msg = string.Empty;
 
             if (SQLite3.Version.CompareTo(SQLiteVersion.Of(3007015)) >= 0)
             {
@@ -36,7 +37,7 @@ namespace SQLitePCL.pretty
 
             if (raw.SQLITE_OK != rc)
             {
-                throw SQLiteException.Create(rc, rc, msg);
+                SQLiteException.Throw(rc, rc, msg);
             }
         }
 
@@ -45,7 +46,7 @@ namespace SQLitePCL.pretty
             int extended = raw.sqlite3_extended_errcode(db);
             if (raw.SQLITE_OK != rc)
             {
-                throw SQLiteException.Create(rc, extended, raw.sqlite3_errmsg(db).utf8_to_string());
+                SQLiteException.Throw(rc, extended, raw.sqlite3_errmsg(db).utf8_to_string());
             }
         }
 
@@ -54,6 +55,10 @@ namespace SQLitePCL.pretty
 
         internal static Exception Create(int rc, int extended, string msg) =>
             Create((ErrorCode)rc, (ErrorCode)extended, msg);
+
+        [DoesNotReturn]
+        internal static void Throw(int rc, int extended, string msg)
+            => throw Create((ErrorCode)rc, (ErrorCode)extended, msg);
 
         internal static Exception Create(ErrorCode rc, ErrorCode extended, string msg)
         {

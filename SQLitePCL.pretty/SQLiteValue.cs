@@ -16,6 +16,7 @@
 */
 
 using System;
+using System.Buffers.Text;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -184,7 +185,7 @@ namespace SQLitePCL.pretty
         /// <param name="This">The value to convert</param>
         /// <returns>A ISQLiteValue representing the value.</returns>
         public static ISQLiteValue ToSQLiteValue(this decimal This) =>
-            Convert.ToDouble(This).ToSQLiteValue();         
+            Convert.ToDouble(This).ToSQLiteValue();
 
         /// <summary>
         /// Converts an <see cref="Guid"/> to an <see cref="ISQLiteValue"/>.
@@ -245,7 +246,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns the SQLiteValue as a <see cref="bool"/>. 
+        /// Returns the SQLiteValue as a <see cref="bool"/>.
         /// </summary>
         public static bool ToBool(this ISQLiteValue This)
         {
@@ -254,16 +255,16 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns the SQLiteValue as a <see cref="float"/>. 
+        /// Returns the SQLiteValue as a <see cref="float"/>.
         /// </summary>
         public static float ToFloat(this ISQLiteValue This)
         {
             Contract.Requires(This != null);
-            return (float) This.ToDouble();
+            return (float)This.ToDouble();
         }
 
         /// <summary>
-        /// Returns the SQLiteValue as a <see cref="TimeSpan"/>. 
+        /// Returns the SQLiteValue as a <see cref="TimeSpan"/>.
         /// </summary>
         public static TimeSpan ToTimeSpan(this ISQLiteValue This)
         {
@@ -272,16 +273,16 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns the SQLiteValue as a <see cref="DateTime"/>. 
+        /// Returns the SQLiteValue as a <see cref="DateTime"/>.
         /// </summary>
         public static DateTime ToDateTime(this ISQLiteValue This)
         {
             Contract.Requires(This != null);
-            return new DateTime (This.ToInt64());
+            return new DateTime(This.ToInt64());
         }
 
         /// <summary>
-        /// Returns the SQLiteValue as a <see cref="DateTimeOffset"/>. 
+        /// Returns the SQLiteValue as a <see cref="DateTimeOffset"/>.
         /// </summary>
         public static DateTimeOffset ToDateTimeOffset(this ISQLiteValue This)
         {
@@ -290,7 +291,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns the SQLiteValue as a <see cref="uint"/>. 
+        /// Returns the SQLiteValue as a <see cref="uint"/>.
         /// </summary>
         public static uint ToUInt32(this ISQLiteValue This)
         {
@@ -299,7 +300,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns the SQLiteValue as a <see cref="decimal"/>. 
+        /// Returns the SQLiteValue as a <see cref="decimal"/>.
         /// </summary>
         public static decimal ToDecimal(this ISQLiteValue This)
         {
@@ -308,7 +309,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns the SQLiteValue as a <see cref="byte"/>. 
+        /// Returns the SQLiteValue as a <see cref="byte"/>.
         /// </summary>
         public static byte ToByte(this ISQLiteValue This)
         {
@@ -317,7 +318,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns the SQLiteValue as a <see cref="UInt16"/>. 
+        /// Returns the SQLiteValue as a <see cref="UInt16"/>.
         /// </summary>
         public static UInt16 ToUInt16(this ISQLiteValue This)
         {
@@ -326,7 +327,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns the SQLiteValue as a <see cref="short"/>. 
+        /// Returns the SQLiteValue as a <see cref="short"/>.
         /// </summary>
         public static short ToShort(this ISQLiteValue This)
         {
@@ -335,7 +336,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns the SQLiteValue as a <see cref="sbyte"/>. 
+        /// Returns the SQLiteValue as a <see cref="sbyte"/>.
         /// </summary>
         public static sbyte ToSByte(this ISQLiteValue This)
         {
@@ -344,7 +345,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns the SQLiteValue as a <see cref="Guid"/>. 
+        /// Returns the SQLiteValue as a <see cref="Guid"/>.
         /// </summary>
         public static Guid ToGuid(this ISQLiteValue This)
         {
@@ -355,7 +356,7 @@ namespace SQLitePCL.pretty
         }
 
         /// <summary>
-        /// Returns the SQLiteValue as a <see cref="Uri"/>. 
+        /// Returns the SQLiteValue as a <see cref="Uri"/>.
         /// </summary>
         public static Uri ToUri(this ISQLiteValue This)
         {
@@ -430,8 +431,16 @@ namespace SQLitePCL.pretty
         public int Length =>
             this.ToBlob().Length;
 
-        public ReadOnlySpan<byte> ToBlob() =>
-            this.ToString().ToSQLiteValue().ToBlob();
+        public ReadOnlySpan<byte> ToBlob()
+        {
+            Span<byte> span = new byte[11];
+            if (!Utf8Formatter.TryFormat(value, span, out var bytesWritten))
+            {
+                ThrowHelper.ThrowFormatException();
+            }
+
+            return span.Slice(0, bytesWritten);
+        }
 
         public double ToDouble() => value;
 
@@ -507,7 +516,7 @@ namespace SQLitePCL.pretty
 
         public SQLiteType SQLiteType => SQLiteType.Text;
 
-        public int Length => this.ToBlob().Length;
+        public int Length => Encoding.UTF8.GetByteCount(value);
 
         public ReadOnlySpan<byte> ToBlob() => Encoding.UTF8.GetBytes(value);
 
@@ -522,8 +531,7 @@ namespace SQLitePCL.pretty
             var result = stringToDoubleCast.Match(this.value);
             if (result.Success)
             {
-                double parsed;
-                if (double.TryParse(result.Value, out parsed))
+                if (double.TryParse(result.Value, out double parsed))
                 {
                     return parsed;
                 }
@@ -547,8 +555,7 @@ namespace SQLitePCL.pretty
             var result = stringToLongCast.Match(this.value);
             if (result.Success)
             {
-                long parsed;
-                if (long.TryParse(result.Value, out parsed))
+                if (long.TryParse(result.Value, out long parsed))
                 {
                     return parsed;
                 }
@@ -646,7 +653,7 @@ namespace SQLitePCL.pretty
 
         public int Length => length;
 
-        public ReadOnlySpan<byte> ToBlob() => new ReadOnlySpan<byte>(new byte[length]);
+        public ReadOnlySpan<byte> ToBlob() => new byte[length];
 
         public double ToDouble() => 0;
 

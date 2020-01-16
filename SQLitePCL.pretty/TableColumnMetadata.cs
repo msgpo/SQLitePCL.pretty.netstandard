@@ -135,7 +135,7 @@ namespace SQLitePCL.pretty
 
         /// <inheritdoc/>
         public override bool Equals(object other) =>
-            other is TableColumnMetadata && this == (TableColumnMetadata)other;
+            other is TableColumnMetadata metadata && this == metadata;
 
         /// <inheritdoc/>
         public override int GetHashCode()

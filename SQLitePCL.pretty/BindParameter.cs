@@ -105,11 +105,11 @@ namespace SQLitePCL.pretty
 
             if (!value.CanRead)
             {
-                throw new ArgumentException("Stream is not readable");
+                ThrowHelper.ThrowArgumentException("Stream is not readable");
             }
 
             // FIXME: Stream.Length is Int64, better to take max int
-            This.BindZeroBlob((int) value.Length);
+            This.BindZeroBlob((int)value.Length);
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace SQLitePCL.pretty
             else if (obj is Uri uri)                                                          { This.Bind(uri); }
             else
             {
-                throw new ArgumentException($"Invalid type conversion {t}");
+                ThrowHelper.ThrowArgumentException($"Invalid type conversion {t}");
             }
         }
 

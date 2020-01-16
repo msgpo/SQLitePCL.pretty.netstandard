@@ -123,7 +123,7 @@ namespace SQLitePCL.pretty
 
         /// <inheritdoc/>
         public override bool Equals(object other) =>
-            other is SQLiteVersion && this == (SQLiteVersion)other;
+            other is SQLiteVersion version && this == version;
 
         /// <inheritdoc/>
         public int CompareTo(SQLiteVersion other) =>
@@ -132,11 +132,13 @@ namespace SQLitePCL.pretty
         /// <inheritdoc/>
         public int CompareTo(object obj)
         {
-            if (obj is SQLiteVersion)
+            if (obj is SQLiteVersion version)
             {
-                return this.CompareTo((SQLiteVersion)obj);
+                return this.CompareTo(version);
             }
-            throw new ArgumentException("Can only compare to other SQLiteVersion");
+
+            ThrowHelper.ThrowArgumentException("Can only compare to other SQLiteVersion");
+            return 0; // Unreachable
         }
     }
 }
