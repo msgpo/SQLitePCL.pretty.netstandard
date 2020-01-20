@@ -4,7 +4,34 @@ namespace SQLitePCL.pretty
 {
     internal sealed class OrderedSet<T> : ICollection<T>
     {
-        private static IEnumerator<T> Reverse(LinkedList<T> list)
+        private readonly LinkedList<T> list = new LinkedList<T>();
+
+        public void Add(T item)
+        {
+            if (list.Contains(item))
+            {
+                list.AddLast(item);
+            }
+        }
+
+        public void Clear()
+        {
+            list.Clear();
+        }
+
+        public bool Contains(T item) =>
+            list.Contains(item);
+
+        public void CopyTo(T[] array, int arrayIndex) =>
+            list.CopyTo(array, arrayIndex);
+
+        public int Count => list.Count;
+
+        public bool IsReadOnly => false;
+
+        public bool Remove(T item) => list.Remove(item);
+
+        public IEnumerable<T> Reverse()
         {
             var el = list.Last;
             while (el != null)
@@ -13,48 +40,6 @@ namespace SQLitePCL.pretty
                 el = el.Previous;
             }
         }
-
-        private readonly IDictionary<T, LinkedListNode<T>> set = new Dictionary<T, LinkedListNode<T>>();
-        private readonly LinkedList<T> list = new LinkedList<T>();
-
-        public void Add(T item)
-        {
-            if (!set.ContainsKey(item))
-            {
-                var node = list.AddLast(item);
-                set.Add(item, node);
-            }
-        }
-
-        public void Clear()
-        {
-            set.Clear();
-            list.Clear();
-        }
-
-        public bool Contains(T item) =>
-            set.ContainsKey(item);
-
-        public void CopyTo(T[] array, int arrayIndex) =>
-            list.CopyTo(array, arrayIndex);
-
-        public int Count => set.Count;
-
-        public bool IsReadOnly => false;
-
-        public bool Remove(T item)
-        {
-            if (set.TryGetValue(item, out LinkedListNode<T> value))
-            {
-                set.Remove(item);
-                list.Remove(value);
-            }
-
-            return false;
-        }
-
-        public IEnumerable<T> Reverse() =>
-            new DelegatingEnumerable<T>(() => Reverse(this.list));
 
         public IEnumerator<T> GetEnumerator() =>
             this.list.GetEnumerator();
