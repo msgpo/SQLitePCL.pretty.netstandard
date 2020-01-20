@@ -4,47 +4,45 @@ namespace SQLitePCL.pretty
 {
     internal sealed class OrderedSet<T> : ICollection<T>
     {
-        private readonly LinkedList<T> list = new LinkedList<T>();
+        private readonly List<T> _list = new List<T>();
 
         public void Add(T item)
         {
-            if (list.Contains(item))
+            if (!_list.Contains(item))
             {
-                list.AddLast(item);
+                _list.Add(item);
             }
         }
 
         public void Clear()
-        {
-            list.Clear();
-        }
+            => _list.Clear();
 
-        public bool Contains(T item) =>
-            list.Contains(item);
+        public bool Contains(T item)
+            => _list.Contains(item);
 
-        public void CopyTo(T[] array, int arrayIndex) =>
-            list.CopyTo(array, arrayIndex);
+        public void CopyTo(T[] array, int arrayIndex)
+            => _list.CopyTo(array, arrayIndex);
 
-        public int Count => list.Count;
+        public int Count => _list.Count;
 
         public bool IsReadOnly => false;
 
-        public bool Remove(T item) => list.Remove(item);
+        public bool Remove(T item)
+            => _list.Remove(item);
 
         public IEnumerable<T> Reverse()
         {
-            var el = list.Last;
-            while (el != null)
+            var len = _list.Count;
+            for (int i = len - 1; i >= 0; i--)
             {
-                yield return el.Value;
-                el = el.Previous;
+                yield return _list[i];
             }
         }
 
-        public IEnumerator<T> GetEnumerator() =>
-            this.list.GetEnumerator();
+        public IEnumerator<T> GetEnumerator()
+            => this._list.GetEnumerator();
 
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() =>
-            this.GetEnumerator();
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            => this.GetEnumerator();
     }
 }
